@@ -17,42 +17,41 @@ unsigned long preAutoWindMillis=1;// 자동 송풍 타이머 시작 시간
 unsigned long previousMillis=1;   // 타이머 시작 시간
 unsigned long currentMillis;      // 타이머 체크 시간
 //LCD 관련 변수
-int delayTimer = 5000;            // 타이머 간격 시간
-LiquidCrystal_I2C lcd(0x27,16,2); // 접근주소: 0x3F or 0x27
+int delayTimer = 5000;                // 타이머 간격 시간
+LiquidCrystal_I2C lcd(0x27,16,2);     // 접근주소: 0x3F or 0x27
 // 온습도 관련 변수
-DHT dht(DHTPIN, DHTTYPE);         // 온습도 객체 (DHT22 (AM2302) 센서종류 설정)
+DHT dht(DHTPIN, DHTTYPE);                 // 온습도 객체 (DHT22 (AM2302) 센서종류 설정)
 // IR 관련 변수
-int ir = 3;                      // ir Pin
-IRsend irsend;                    // irsend 객체 형성
-// 취침 자동전원 관련 변수
-int offTimer = 30*1000*60;        // 종료 타이머 반복 시간 간격
-int onTimer = 90*1000*60;         // 실행 타이머 반복 시간 간격
-int windTimer = 20*1000*60;       // 송풍 타이머 시간
-byte offTimerCnt = 0;              // 종료 타이머 작동 반응 변수
-byte onTimerCnt = 0;               // 실행 타이머 작동 반응 변수 
-byte windTimerCnt = 0;             // 송풍 타이머 작동 반응 변수
-boolean autoFuncState = 0;            // 자동 취침 기능 사용 여부 0:미사용 1:사용
-boolean autoAirconState = 0;          // 자동 취침 이용할 때, 에어컨 작동 여부
-boolean autoFanState = 0;             // 자동 취침 이용할 때, 선풍기 작동 여부
+int ir = 3;                           // ir Pin
+IRsend irsend;                        // irsend 객체 형성
+// 취침 자동전원 관련 변수   
+unsigned long offTimer = 1800000;         // 종료 타이머 반복 시간 간격
+unsigned long onTimer = 5400000;          // 실행 타이머 반복 시간 간격
+unsigned long windTimer = 1200000;        // 송풍 타이머 시간
+byte offTimerCnt = 0;                     // 종료 타이머 작동 반응 변수
+byte onTimerCnt = 0;                      // 실행 타이머 작동 반응 변수 
+byte windTimerCnt = 0;                    // 송풍 타이머 작동 반응 변수
+boolean autoFuncState = 0;                // 자동 취침 기능 사용 여부 0:미사용 1:사용
+boolean autoAirconState = 0;              // 자동 취침 이용할 때, 에어컨 작동 여부
+boolean autoFanState = 0;                 // 자동 취침 이용할 때, 선풍기 작동 여부
 // 조도센서 관련 변수
-int cds = 0;                      // 조도센서 값
-int cdsCnd = 800;                 // 조도센서 기준 값
+int cds = 0;                          // 조도센서 값
+int cdsCnd = 800;                     // 조도센서 기준 값
 boolean cnt = 1;                      // 조도센서 변화 반응 변수
 boolean cdsFuncState = 0;             // 조도센서를 이용한 기능 사용 여부
 boolean airconState = 0;              // 조도센서 이용할 때, 에어컨 작동 여부
-boolean lightState = 0;               // 조도센서 이용할 때, 전등 작동 여부
 boolean fanState = 0;                 // 조도센서 이용할 때, 선풍기 작동 여부
 // 소리 센서 관련 변수
-byte minLimit = 50;                // 측정 가능한 최소 값
-byte minSound = 100;               // 소음 허용 범위
-byte maxSound = 110;               // 소음 허용 범위
-byte maxLimit = 200;               // 측정 가능한 최소 값
-byte countClap = 0;                // 인식 박수 횟수
-byte delayClap = 1000;             // 박수 사이 간격(ms)
-boolean soundFuncState = 1;           // 전등 박수 기능 사용
-boolean debugSound = 0;               // 오작동 시, 센서 상태 확인
+byte minLimit = 50;                       // 측정 가능한 최소 값
+byte minSound = 100;                      // 소음 허용 범위
+byte maxSound = 110;                      // 소음 허용 범위
+byte maxLimit = 200;                      // 측정 가능한 최소 값
+byte countClap = 0;                       // 인식 박수 횟수
+byte delayClap = 1000;                    // 박수 사이 간격(ms)
+boolean soundFuncState = 1;               // 전등 박수 기능 사용
+boolean debugSound = 0;                   // 오작동 시, 센서 상태 확인
 // 에어컨 관련 변수
-boolean windFuncState = 1;            // 송풍 기능 사용
+boolean windFuncState = 1;                // 송풍 기능 사용
 
 //에어컨 ir 코드
 const uint16_t onIrSignal[] PROGMEM = { 9000,4400, 600,1650, 600,1600, 600,500, 600,500, 600,500, 600,500, 600,1650, 600,1650, 550,1650, 550,1700, 600,1650, 550,500, 600,1650, 600,1650, 550,1650, 600,500, 600,500, 600,500, 550,550, 600,500, 600,500, 600,1650, 550,1700, 550,1650, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 550,550, 600,500, 550,550, 600,500, 600,500, 550,550, 600,500, 600,1650, 550,500, 600,550, 550,500, 600,550, 550,500, 600,500, 600,550, 550,550, 550,550, 550,550, 550,550, 550,550, 550,550, 600,500, 600,1650, 550,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,1650, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,500, 600,1650, 600,500, 600,1650, 550,550, 550,550, 550,550, 550,550, 550,550, 550,1650, 600,1600, 600,1650, 600,1650, 550,1650, 600,500, 600,500, 550,1700, 550 };
@@ -83,8 +82,8 @@ void changeState(boolean &state){
  * 전송을 위한 스위치 상태값 생성
  */
 String setSwitchData(){
-  String switchData = String(cdsFuncState) + ',' + String(airconState) + ',' + String(lightState) + ',' + String(fanState)
-                            + '/' + String(autoFuncState) + ',' + String(autoAirconState) + ',' + String(autoFanState) + '/' + String(soundFuncState) + ',' + String(windFuncState);
+  String switchData = String(cdsFuncState) + ',' + String(airconState) + ',' + String(fanState) + '/' + String(autoFuncState) + ',' 
+                          + String(autoAirconState) + ',' + String(autoFanState) + '/' + String(soundFuncState) + ',' + String(windFuncState);
   return switchData;      
 }
 
@@ -105,11 +104,11 @@ void pre_time_set(unsigned long &preMillis){
 /**
  * 타이머 체크 함수 (1=종료)
  */
-bool time_check(unsigned long preMillis, int delayTime){
+bool time_check(unsigned long preMillis, unsigned long delayTime){
   int check  = 0;
   
   // 설정한 delayTime이 지나면 실행
-  if((int)(currentMillis - preMillis) >= delayTime && previousMillis!=0){
+  if(currentMillis - preMillis >= delayTime && previousMillis!=0){
     check = 1;
   }
   
@@ -230,10 +229,10 @@ void airconTransmit(byte data) {
     irsend.sendRaw_P(offIrSignal, sizeof(offIrSignal) / sizeof(offIrSignal[0]), khz);
   }else if(data == 99){
     if(windFuncState==1){
-      // 송풍 30분 후 종료
+      // 송풍 20분 후 종료
       irsend.sendRaw_P(windIrSignal, sizeof(windIrSignal) / sizeof(windIrSignal[0]), khz);
       pre_time_set(preAutoWindMillis);                    // 송풍 타이머 설정
-      windTimerCnt=1;                                     // 송풍 카운트 0 설정
+      windTimerCnt=1;                                     // 송풍 카운트 1 설정
     }else{
       airconTransmit('b');
     }
@@ -253,7 +252,7 @@ void setup(){
 }
 
 void loop() {
-  cur_time_set();               // LCD 타이머 기준 시간 설정
+  cur_time_set();               // 타이머 기준 시간 설정
   //LCD OFF 체크
   if(time_check(previousMillis, delayTimer)){
     lcd.noBacklight();   
@@ -316,7 +315,7 @@ void loop() {
           changeState(airconState);
           break;  
         case 'x': 
-          changeState(lightState); 
+          //기능 삭제
           break; 
         case 'y': 
           changeState(fanState); 
@@ -345,12 +344,10 @@ void loop() {
     cds = analogRead(cdsPin);                         // A1으로 들어오는 값을 cds에 저장
     if(cds < cdsCnd && cnt==1){                       // cds값이 cdsCnd보다 작으면 불이 켜져있음
       if(airconState==1) airconTransmit('a');         // 에어컨 켜기
-      if(lightState==1) Serial.write('W');            // 전등 켜기   
       if(fanState==1) irTransmit('A');                // 선풍기 켜기
       cnt=0;                                          // 설정에 따른 중복 작동 방지
     }else if(cds >= cdsCnd && cnt==0){                // cds값이 cdsCnd보다 크면 불이 꺼져있음
       if(airconState==1) airconTransmit('c');         // 에어컨 끄기
-      if(lightState==1) Serial.write('X');            // 전등 끄기  
       if(fanState==1) irTransmit('A');                // 선풍기 끄기
       cnt=1;                                          // 설정에 따른 중복 작동 방지
     }
@@ -363,19 +360,19 @@ void loop() {
     if(preAutoOffMillis==1&&offTimerCnt==0&&onTimerCnt==0){
       pre_time_set(preAutoOffMillis);                     // 시작 타이머 시작
       offTimerCnt=1;                                      // 종료 카운트 1 설정
-      windTimerCnt=1;                                     // 송풍 카운트 1 설정
     }
     if(time_check(preAutoOffMillis, offTimer) && offTimerCnt==1){
       if(autoAirconState==1) airconTransmit('c');         // 에어컨 송풍 켜기 또는 종료
       if(autoFanState==1) irTransmit('A');                // 선풍기 끄기
+      if(windFuncState==1) onTimer += windTimer;          // 송풍 체크에 따른 종료 시간 지연 설정
       pre_time_set(preAutoOnMillis);                      // 종료 타이머 시작
-      if(windFuncState==1) preAutoOnMillis += windTimer;  // 송풍 체크에 따른 종료 시간 지연 설정
       offTimerCnt=0;                                      // 종료 카운트 0 설정
       onTimerCnt=1;                                       // 시작 카운트 1 설정
     }
     if(time_check(preAutoOnMillis, onTimer) && onTimerCnt==1){
       if(autoAirconState==1) airconTransmit('a');         // 에어컨 켜기
       if(autoFanState==1) irTransmit('A');                // 선풍기 켜기
+      if(windFuncState==1) onTimer -= windTimer;          // 송풍 체크에 따른 종료 시간 지연 설정
       pre_time_set(preAutoOffMillis);                     // 시작 타이머 시작
       offTimerCnt=1;                                      // 종료 카운트 1 설정
       onTimerCnt=0;                                       // 시작 카운트 0 설정
